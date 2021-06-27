@@ -1,11 +1,10 @@
-package com.ambrosio.f4
+package com.ambrosio.f4.boundService
 
 import android.os.IBinder
 import android.os.Binder
 import android.os.Handler
 import android.app.Service
 import android.content.Intent
-import com.ambrosio.f4.basicService.MyService
 import java.lang.Runnable
 
 class MyBoundService : Service() {
@@ -18,6 +17,7 @@ class MyBoundService : Service() {
 
     override fun onCreate(){
         super.onCreate()
+        println("MyBoundService onCreate")
         mHandler = Handler()
         mProgress = 0
         mIsPaused = true
@@ -25,6 +25,7 @@ class MyBoundService : Service() {
     }
 
     override fun onBind(intent: Intent?): IBinder {
+        println("onBind")
         return mBinder
     }
 
@@ -34,58 +35,67 @@ class MyBoundService : Service() {
 //        println("Intent service started")
 //    }
 
-    class MyBinder: Binder(){
+    inner class MyBinder: Binder(){
 
-        fun getService(): MyService {
-            return MyService()
+        fun getService(): MyBoundService {
+            return this@MyBoundService
         }
     }
 
-    fun startPretendLongRunningTask(){
-        val runnable: Runnable = Runnable {
-            if(mProgress >= mMaxValue || mIsPaused){
-                println("run: removing callbacks")
-//                mHandler.removeCallbacks()
-                pausePretendLongRunningTask()
-            } else {
-                println("run: Progress $mProgress")
+    private fun startPretendLongRunningTask(){
+        val runnable = object :  Runnable {
+            override fun run(){
+                if(mProgress >= mMaxValue || mIsPaused){
+                    println("run: removing callbacks")
+                    mHandler.removeCallbacksAndMessages(null)
+                    pausePretendLongRunningTask()
+                } else {
+                    println("run: Progress $mProgress")
+                    mProgress += 100
+                    mHandler.postDelayed(this, 100)
+                }
             }
-
         }
-        mHandler.postDelayed(runnable, 1000)
+        mHandler.postDelayed(runnable, 100)
     }
 
-    private fun pausePretendLongRunningTask(){
+    fun pausePretendLongRunningTask(){
         mIsPaused = true
     }
 
-    private fun unPausePretendLongRunningTask(){
+    fun unPausePretendLongRunningTask(){
         mIsPaused = false
         startPretendLongRunningTask()
     }
 
-    private fun isPaused(): Boolean {
+    fun isPaused(): Boolean {
         return mIsPaused
     }
 
-    private fun getProgress(): Int {
+    fun getProgress(): Int {
         return mProgress
     }
 
-    private fun getMaxValue(): Int {
+    fun getMaxValue(): Int {
         return mMaxValue
     }
 
-    private fun resetTask(){
+    fun isFinished(): Boolean {
+        return mProgress == mMaxValue
+    }
+
+    fun resetTask(){
         mProgress = 0
     }
 
     override fun onTaskRemoved(rootIntent: Intent){
+        println("onTaskRemoved")
         super.onTaskRemoved(rootIntent)
         stopSelf()
     }
 
     override fun onDestroy() {
         println("Service onDestroy")
+        super.onDestroy()
     }
 }

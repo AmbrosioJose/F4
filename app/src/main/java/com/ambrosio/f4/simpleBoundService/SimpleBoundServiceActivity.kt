@@ -2,7 +2,6 @@ package com.ambrosio.f4.simpleBoundService
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.ambrosio.f4.BoundService
 import com.ambrosio.f4.R
 import android.view.View
 import android.widget.TextView

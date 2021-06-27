@@ -1,4 +1,4 @@
-package com.ambrosio.f4
+package com.ambrosio.f4.simpleBoundService
 
 import android.app.Service
 import android.content.Intent
